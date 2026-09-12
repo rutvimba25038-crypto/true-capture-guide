@@ -94,7 +94,39 @@ function RoomScreen() {
       <PixelStrip />
 
       {!playing ? (
-        <main className="mx-auto grid max-w-6xl gap-8 px-5 py-10 lg:grid-cols-[1.1fr_1fr]">
+        <main className="mx-auto grid max-w-6xl gap-8 px-5 py-10">
+          <PixelPanel large className="grid gap-5 text-center">
+            <div>
+              <div className="text-4xl">🏝️ 🎲 🏠</div>
+              <h1 className="mt-2 text-lg">How to play CATAN</h1>
+              <p className="mt-2 font-mono text-sm text-muted-foreground">Everything you need to know before the game begins.</p>
+            </div>
+            <div className="grid gap-3 text-left md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-2 border-3 border-foreground bg-primary/10 p-4">
+                <div className="text-3xl">🏠 → 🛣️</div>
+                <strong className="font-display text-[11px]">1. SET UP</strong>
+                <p className="font-mono text-xs">Place a settlement, then a road touching it. Everyone places twice.</p>
+              </div>
+              <div className="grid gap-2 border-3 border-foreground bg-background p-4">
+                <div className="text-3xl">🎲 → 🌲🧱🐑🌾⛰️</div>
+                <strong className="font-display text-[11px]">2. ROLL & COLLECT</strong>
+                <p className="font-mono text-xs">Roll the dice. Matching tiles beside your buildings produce resources.</p>
+              </div>
+              <div className="grid gap-2 border-3 border-foreground bg-background p-4">
+                <div className="text-3xl">🛣️ 🏠 🏙️ 🤝</div>
+                <strong className="font-display text-[11px]">3. BUILD & TRADE</strong>
+                <p className="font-mono text-xs">Use resources to build, upgrade and trade with other players or the bank.</p>
+              </div>
+              <div className="grid gap-2 border-3 border-foreground bg-primary/10 p-4">
+                <div className="text-3xl">🏆 10 VP</div>
+                <strong className="font-display text-[11px]">4. WIN</strong>
+                <p className="font-mono text-xs">Earn victory points. The first player to reach 10 wins.</p>
+              </div>
+            </div>
+            <div className="border-3 border-foreground bg-muted p-3 font-mono text-xs"><strong>⚠️ ROLL A 7?</strong> Players with more than 7 cards discard half. Then move the robber and steal a random card from an adjacent player.</div>
+          </PixelPanel>
+
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr]">
           <PixelPanel large className="flex flex-col items-center gap-6 text-center">
             <h1 className="text-lg">Scan to join</h1>
             <QrCode value={joinUrl} size={230} />
@@ -148,6 +180,7 @@ function RoomScreen() {
               {players.length < 3 ? "Need 3+ players" : "Start game"}
             </PixelButton>
           </PixelPanel>
+          </div>
         </main>
       ) : (
         <main className="mx-auto grid max-w-7xl gap-8 px-5 py-8 lg:grid-cols-[1.4fr_1fr]">
