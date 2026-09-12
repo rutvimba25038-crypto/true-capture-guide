@@ -5,7 +5,7 @@ import { QrCode } from "@/components/QrCode";
 import { useRoom } from "@/hooks/useRoom";
 import { supabase } from "@/integrations/supabase/client";
 import type { CatanState, PlayerHand } from "@/lib/catan";
-import { emptyHand } from "@/lib/catan";
+import { createCatanState, emptyHand, publicVictoryPoints } from "@/lib/catan";
 import { colorClass } from "@/lib/games";
 import { cn } from "@/lib/utils";
 
@@ -63,7 +63,12 @@ function RoomScreen() {
   const current = players.find((p) => p.seat === state?.turnSeat);
 
   const startGame = async () => {
-    await supabase.from("rooms").update({ status: "playing" }).eq("id", room.id);
+    const fresh = createCatanState(players.length);
+    const { error } = await supabase
+      .from("rooms")
+      .update({ status: "playing", state: fresh })
+      .eq("id", room.id);
+    if (error) console.error("Could not start game:", error);
   };
 
   const goToNewGame = () => {
@@ -186,7 +191,7 @@ function RoomScreen() {
                         )}
                       />
                       <span className="flex-1 font-mono">{p.name}</span>
-                      <span className="font-display text-[10px]">{cards} cards</span>
+                      <span className="font-display text-[10px]">{cards} cards · {publicVictoryPoints(state, p.seat)} VP</span>
                     </li>
                   );
                 })}
