@@ -7,6 +7,8 @@ type Props = {
   onEdge?: (id: string) => void;
   onTile?: (index: number) => void;
   seatColors?: Record<number, string>;
+  highlightedIntersections?: string[];
+  highlightedEdges?: string[];
 };
 
 const terrainFill: Record<string, string> = {
@@ -15,7 +17,7 @@ const terrainFill: Record<string, string> = {
 };
 const playerFill = (seat: number, colors?: Record<number, string>) => colors?.[seat] ?? ["#e05252","#4d83d8","#e0b43e","#58a56a"][seat % 4]!;
 
-export function CatanBoard({ state, interactive = false, onIntersection, onEdge, onTile, seatColors }: Props) {
+export function CatanBoard({ state, interactive = false, onIntersection, onEdge, onTile, seatColors, highlightedIntersections = [], highlightedEdges = [] }: Props) {
   const geometry = getBoardGeometry(state.rows);
   const pointsForTile = (index: number) => (geometry.tileVertices[index] ?? []).map((id) => {
     const p = geometry.intersections.find((i) => i.id === id)!;
@@ -45,7 +47,7 @@ export function CatanBoard({ state, interactive = false, onIntersection, onEdge,
           const b = geometry.intersections.find((i) => i.id === edge.b)!;
           const road = state.roads.find((r) => r.edgeId === edge.id);
           return <line key={edge.id} x1={a.x} y1={a.y} x2={b.x} y2={b.y}
-            stroke={road ? playerFill(road.seat, seatColors) : "rgba(36,36,36,.16)"} strokeWidth={road ? 12 : 5}
+            stroke={road ? playerFill(road.seat, seatColors) : highlightedEdges.includes(edge.id) ? "#ffffff" : "rgba(36,36,36,.16)"} strokeWidth={road ? 12 : highlightedEdges.includes(edge.id) ? 10 : 5}
             strokeLinecap="round" onClick={() => interactive && onEdge?.(edge.id)} className={interactive && onEdge ? "cursor-pointer" : ""} />;
         })}
         {geometry.intersections.map((point) => {
@@ -54,7 +56,7 @@ export function CatanBoard({ state, interactive = false, onIntersection, onEdge,
             {building ? building.type === "city"
               ? <rect x={point.x - 13} y={point.y - 13} width="26" height="26" rx="3" fill={playerFill(building.seat, seatColors)} stroke="#242424" strokeWidth="4" />
               : <circle cx={point.x} cy={point.y} r="11" fill={playerFill(building.seat, seatColors)} stroke="#242424" strokeWidth="4" />
-              : <circle cx={point.x} cy={point.y} r={interactive ? 7 : 4} fill="rgba(255,255,255,.45)" stroke="#242424" strokeWidth="2" />}
+              : <circle cx={point.x} cy={point.y} r={highlightedIntersections.includes(point.id) ? 13 : interactive ? 7 : 4} fill={highlightedIntersections.includes(point.id) ? "#ffffff" : "rgba(255,255,255,.45)"} stroke={highlightedIntersections.includes(point.id) ? "#e0b43e" : "#242424"} strokeWidth={highlightedIntersections.includes(point.id) ? 5 : 2} />}
           </g>;
         })}
       </svg>
