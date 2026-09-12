@@ -4,7 +4,7 @@ import { PixelButton, PixelPanel } from "@/components/pixel";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getRoomByCode, joinRoom } from "@/lib/room";
 
-type JoinSearch = { code?: string };
+type JoinSearch = { code?: string | undefined };
 
 export const Route = createFileRoute("/join")({
   validateSearch: (search: Record<string, unknown>): JoinSearch => ({
