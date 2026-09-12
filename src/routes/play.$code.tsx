@@ -348,8 +348,20 @@ function PlayScreen() {
         </PixelPanel>
         <PixelPanel large className="grid gap-4 text-center"><h1>Waiting room</h1><p className="font-mono text-sm text-muted-foreground">When you're ready, mark yourself ready. Start the game from the shared screen.</p><PixelButton onClick={toggleReady} variant={me.ready ? "ghost" : "primary"}>{me.ready ? "I'm not ready" : "I'm ready"}</PixelButton><ul className="grid gap-2 text-left">{players.map((p) => <li key={p.id} className="flex items-center gap-2 border-3 border-foreground px-3 py-2"><span className="flex-1 font-mono">{p.name}</span><PixelTag tone={p.ready ? "live" : "muted"}>{p.ready ? "Ready" : "…"}</PixelTag></li>)}</ul></PixelPanel></div> : <>
         <div className="grid gap-4">
+          {(highlightSettlements.length > 0 || highlightRoads.length > 0 || state.phase === "robber-move") && (
+            <PixelPanel large className="grid gap-3 bg-primary/15 text-center">
+              <div className="font-display text-[10px] text-muted-foreground">GUIDED ACTION</div>
+              <div className="text-3xl">{highlightSettlements.length ? "🏠" : highlightRoads.length ? "🛣️" : "🦹"}</div>
+              <div className="font-display text-lg">{highlightSettlements.length ? "STEP 1: CHOOSE A SETTLEMENT SPOT" : highlightRoads.length ? "STEP 2: CHOOSE A ROAD LOCATION" : "CHOOSE WHERE TO MOVE THE ROBBER"}</div>
+              <p className="font-mono text-xs text-muted-foreground">{highlightSettlements.length ? "Tap any glowing circle below. Only legal locations are highlighted." : highlightRoads.length ? "Tap any bright highlighted road line below. Choose the location you want." : "Tap any valid tile below to choose the robber's new location."}</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {highlightSettlements.slice(0, 12).map((id, i) => <PixelButton key={id} size="sm" onClick={() => placeIntersection(id)}>Spot {i + 1}</PixelButton>)}
+                {highlightRoads.slice(0, 12).map((id, i) => <PixelButton key={id} size="sm" onClick={() => placeEdge(id)}>Road {i + 1}</PixelButton>)}
+              </div>
+            </PixelPanel>
+          )}
           <CatanBoard state={state} interactive={myTurn && (state.phase === "setup" || mode != null || state.phase === "robber-move")} onIntersection={placeIntersection} onEdge={placeEdge} onTile={moveRobber} seatColors={seatColors} highlightedIntersections={highlightSettlements} highlightedEdges={highlightRoads} />
-          <p className="border-2 border-foreground bg-primary/10 p-2 font-mono text-xs text-muted-foreground">{highlightSettlements.length ? "🏠 White/gold circles are legal places to build your settlement. Tap one on THIS phone." : highlightRoads.length ? "🛣️ Bright road lines are legal places to build your road. Tap one on THIS phone." : state.phase === "robber-move" ? "🦹 Tap a different tile on THIS phone to move the robber." : "Choose an action, then tap the highlighted location on THIS phone."}</p>
+          <p className="border-2 border-foreground bg-primary/10 p-2 text-center font-mono text-xs text-muted-foreground">{highlightSettlements.length ? "🏠 Choose a glowing settlement spot above or tap one directly on the board." : highlightRoads.length ? "🛣️ Choose a highlighted road option above or tap a bright road line directly on the board." : state.phase === "robber-move" ? "🦹 Choose a tile on the board to move the robber." : "Choose an action, then select a highlighted location."}</p>
         </div>
         <div className="grid content-start gap-4">
           <PixelPanel large className={cn("text-center", myTurn ? "bg-primary/20" : "")}>
