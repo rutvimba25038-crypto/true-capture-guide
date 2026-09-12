@@ -355,12 +355,13 @@ function PlayScreen() {
               <div className="font-display text-lg">{highlightSettlements.length ? "STEP 1: CHOOSE A SETTLEMENT SPOT" : highlightRoads.length ? "STEP 2: CHOOSE A ROAD LOCATION" : "CHOOSE WHERE TO MOVE THE ROBBER"}</div>
               <p className="font-mono text-xs text-muted-foreground">{highlightSettlements.length ? "Tap any glowing circle below. Only legal locations are highlighted." : highlightRoads.length ? "Tap any bright highlighted road line below. Choose the location you want." : "Tap any valid tile below to choose the robber's new location."}</p>
               <div className="flex flex-wrap justify-center gap-2">
-                {highlightSettlements.slice(0, 12).map((id, i) => <PixelButton key={id} size="sm" onClick={() => placeIntersection(id)}>Spot {i + 1}</PixelButton>)}
-                {highlightRoads.slice(0, 12).map((id, i) => <PixelButton key={id} size="sm" onClick={() => placeEdge(id)}>Road {i + 1}</PixelButton>)}
+                <PixelButton size="sm" variant="primary" onClick={() => document.getElementById("catan-action-map")?.scrollIntoView({ behavior: "smooth", block: "center" })}>VIEW MAP & CHOOSE ↓</PixelButton>
               </div>
             </PixelPanel>
           )}
-          <CatanBoard state={state} interactive={myTurn && (state.phase === "setup" || mode != null || state.phase === "robber-move")} onIntersection={placeIntersection} onEdge={placeEdge} onTile={moveRobber} seatColors={seatColors} highlightedIntersections={highlightSettlements} highlightedEdges={highlightRoads} />
+          <div id="catan-action-map" className={cn((highlightSettlements.length || highlightRoads.length || state.phase === "robber-move") ? "ring-4 ring-primary/40" : "")}>
+            <CatanBoard state={state} interactive={myTurn && (state.phase === "setup" || mode != null || state.phase === "robber-move")} onIntersection={placeIntersection} onEdge={placeEdge} onTile={moveRobber} seatColors={seatColors} highlightedIntersections={highlightSettlements} highlightedEdges={highlightRoads} />
+          </div>
           <p className="border-2 border-foreground bg-primary/10 p-2 text-center font-mono text-xs text-muted-foreground">{highlightSettlements.length ? "🏠 Choose a glowing settlement spot above or tap one directly on the board." : highlightRoads.length ? "🛣️ Choose a highlighted road option above or tap a bright road line directly on the board." : state.phase === "robber-move" ? "🦹 Choose a tile on the board to move the robber." : "Choose an action, then select a highlighted location."}</p>
         </div>
         <div className="grid content-start gap-4">
