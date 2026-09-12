@@ -252,7 +252,9 @@ function PlayScreen() {
       const current = simulated.largestArmySeat == null ? 0 : (armies.find((x) => x.seat === simulated.largestArmySeat)?.n ?? 0);
       const leader = armies.reduce((a, b) => b.n > a.n ? b : a);
       if (leader.n >= 3 && leader.n > current) simulated.largestArmySeat = leader.seat;
-      await updateRoom(logState(simulated, `${me.name} played a Knight. Move the robber.`));
+      const next = logState(simulated, `${me.name} played a Knight. Move the robber.`);
+      await updateRoom(next);
+      await checkWin(next, me, cards);
       return;
     }
     await savePlayer(me, { devCards: cards });
