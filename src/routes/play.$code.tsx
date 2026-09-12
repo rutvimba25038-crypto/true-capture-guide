@@ -115,6 +115,22 @@ function PlayScreen() {
     await supabase.from("players").update({ ready: !me.ready }).eq("id", me.id);
   };
 
+  const startNewGame = async () => {
+    if (!window.confirm("Start a new game? This will reset the board and everyone's resources.")) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from("rooms")
+      .update({ status: "lobby" })
+      .eq("id", room.id);
+
+    if (error) {
+      console.error("Could not start a new game:", error);
+      setNote("Could not start a new game. Please try again.");
+    }
+  };
+
   const doRoll = async () => {
     // Guard the action here too; the button state alone is not enough.
     if (!myTurn || busy || state.dice != null) return;
@@ -188,9 +204,14 @@ function PlayScreen() {
           <span className={cn("size-5 border-2 border-foreground", colorClass[me.color])} />
           <span className="font-display text-[11px]">{me.name}</span>
         </div>
-        <span className="font-display text-[10px] text-muted-foreground">
-          ROOM {room.code}
-        </span>
+        <div className="flex items-center gap-3">
+          <PixelButton size="sm" variant="ghost" onClick={startNewGame}>
+            New game
+          </PixelButton>
+          <span className="font-display text-[10px] text-muted-foreground">
+            ROOM {room.code}
+          </span>
+        </div>
       </header>
 
       <main className="mx-auto grid max-w-md gap-5 px-4 py-6">
