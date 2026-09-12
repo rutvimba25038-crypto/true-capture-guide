@@ -5,7 +5,7 @@ import { QrCode } from "@/components/QrCode";
 import { useRoom } from "@/hooks/useRoom";
 import { supabase } from "@/integrations/supabase/client";
 import type { CatanState, PlayerHand } from "@/lib/catan";
-import { emptyHand } from "@/lib/catan";
+import { createCatanState, emptyHand } from "@/lib/catan";
 import { colorClass } from "@/lib/games";
 import { cn } from "@/lib/utils";
 
@@ -66,16 +66,41 @@ function RoomScreen() {
     await supabase.from("rooms").update({ status: "playing" }).eq("id", room.id);
   };
 
+  const startNewGame = async () => {
+    const { error } = await supabase
+      .from("rooms")
+      .update({
+        status: "lobby",
+        state: createCatanState(),
+      })
+      .eq("id", room.id);
+    if (error) {
+      console.error("Could not start a new game:", error);
+      return;
+    }
+
+    const { error: playersError } = await supabase
+      .from("players")
+      .update({ ready: false, private_state: { hand: emptyHand() } })
+      .eq("room_id", room.id);
+    if (playersError) console.error("Could not reset players:", playersError);
+  };
+
   return (
     <div className="min-h-screen pb-10">
-      <header className="flex items-center justify-between border-b-3 border-foreground bg-card px-5 py-3">
+      <header className="flex items-center justify-between gap-3 border-b-3 border-foreground bg-card px-5 py-3">
         <span className="font-display text-xs">TABLEQUEST</span>
         <span className="font-display text-[10px] uppercase text-muted-foreground">
           {playing ? "Catan · in play" : "Catan · waiting room"}
         </span>
-        <span className="font-display text-[10px]">
-          ROOM <span className="text-pixel-red">{room.code}</span>
-        </span>
+        <div className="flex items-center gap-3">
+          <PixelButton size="sm" variant="ghost" onClick={startNewGame}>
+            New game
+          </PixelButton>
+          <span className="font-display text-[10px]">
+            ROOM <span className="text-pixel-red">{room.code}</span>
+          </span>
+        </div>
       </header>
       <PixelStrip />
 
