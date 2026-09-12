@@ -28,14 +28,12 @@ function HostPage() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [hostName, setHostName] = useState("");
 
   const start = async (gameId: string) => {
     setBusy(gameId);
     setError(null);
     try {
       const room = await createRoom(gameId);
-      await joinRoom(room, hostName.trim() || "Host");
       navigate({ to: "/room/$code", params: { code: room.code } });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not open a table.");
