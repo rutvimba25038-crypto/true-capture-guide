@@ -47,19 +47,10 @@ function HostPage() {
       <main className="mx-auto max-w-5xl px-4 py-10">
         <h1 className="text-xl">Choose a game</h1>
         <p className="mt-3 max-w-xl font-mono text-sm text-muted-foreground">
-          This device becomes the shared board. Everyone else joins from their phone
-          with the code you get next.
+          This device becomes the shared board. Everyone — you included — joins from
+          their own phone using the code you get next.
         </p>
 
-        <PixelPanel className="mt-6 grid gap-2 sm:max-w-sm">
-          <span className="font-display text-[10px] uppercase">Your name</span>
-          <input
-            value={hostName}
-            onChange={(e) => setHostName(e.target.value.slice(0, 14))}
-            placeholder="Host"
-            className="border-3 border-foreground bg-background px-3 py-2 font-mono outline-none focus:bg-primary/20"
-          />
-        </PixelPanel>
 
         {error ? (
           <p className="mt-4 border-3 border-foreground bg-pixel-red/20 p-3 font-mono text-sm">
