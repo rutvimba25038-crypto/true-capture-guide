@@ -312,6 +312,16 @@ function PlayScreen() {
   };
 
   const currentDiscardNeed = state.phase === "robber-discard" ? halfDiscardCount(hand) : 0;
+  const geometry = getBoardGeometry(state.rows);
+  const setupSettlement = state.phase === "setup" && state.setupStep === "settlement";
+  const highlightSettlements = (setupSettlement || mode === "settlement")
+    ? geometry.intersections.filter((p) => canPlaceSettlement(state, me.seat, p.id, setupSettlement)).map((p) => p.id)
+    : [];
+  const freeRoad = state.freeRoadSeat === me.seat && state.freeRoadsRemaining > 0;
+  const setupRoad = state.phase === "setup" && state.setupStep === "road";
+  const highlightRoads = (setupRoad || mode === "road" || freeRoad)
+    ? geometry.edges.filter((e) => canPlaceRoad(state, me.seat, e.id, freeRoad)).map((e) => e.id)
+    : [];
   const pendingTrade = state.trade;
   const setupText = state.phase === "setup" ? `SET-UP: ${state.setupStep === "settlement" ? "place a settlement" : "place an adjacent road"}` : null;
   const points = publicVictoryPoints(state, me.seat) + devCards.filter((c) => c.card === "victoryPoint").length;
@@ -338,8 +348,8 @@ function PlayScreen() {
         </PixelPanel>
         <PixelPanel large className="grid gap-4 text-center"><h1>Waiting room</h1><p className="font-mono text-sm text-muted-foreground">When you're ready, mark yourself ready. Start the game from the shared screen.</p><PixelButton onClick={toggleReady} variant={me.ready ? "ghost" : "primary"}>{me.ready ? "I'm not ready" : "I'm ready"}</PixelButton><ul className="grid gap-2 text-left">{players.map((p) => <li key={p.id} className="flex items-center gap-2 border-3 border-foreground px-3 py-2"><span className="flex-1 font-mono">{p.name}</span><PixelTag tone={p.ready ? "live" : "muted"}>{p.ready ? "Ready" : "…"}</PixelTag></li>)}</ul></PixelPanel></div> : <>
         <div className="grid gap-4">
-          <CatanBoard state={state} interactive={myTurn && (state.phase === "setup" || mode != null || state.phase === "robber-move")} onIntersection={placeIntersection} onEdge={placeEdge} onTile={moveRobber} seatColors={seatColors} />
-          <p className="font-mono text-xs text-muted-foreground">Tap intersections to place settlements/cities, road lines to build roads, and tiles to move the robber.</p>
+          <CatanBoard state={state} interactive={myTurn && (state.phase === "setup" || mode != null || state.phase === "robber-move")} onIntersection={placeIntersection} onEdge={placeEdge} onTile={moveRobber} seatColors={seatColors} highlightedIntersections={highlightSettlements} highlightedEdges={highlightRoads} />
+          <p className="border-2 border-foreground bg-primary/10 p-2 font-mono text-xs text-muted-foreground">{highlightSettlements.length ? "🏠 White/gold circles are legal places to build your settlement. Tap one on THIS phone." : highlightRoads.length ? "🛣️ Bright road lines are legal places to build your road. Tap one on THIS phone." : state.phase === "robber-move" ? "🦹 Tap a different tile on THIS phone to move the robber." : "Choose an action, then tap the highlighted location on THIS phone."}</p>
         </div>
         <div className="grid content-start gap-4">
           <PixelPanel large className={cn("text-center", myTurn ? "bg-primary/20" : "")}>
