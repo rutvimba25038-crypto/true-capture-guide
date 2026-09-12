@@ -330,7 +330,7 @@ function PlayScreen() {
   return <div className="min-h-screen bg-background pb-24 sm:pb-10">
     <header className="sticky top-0 z-40 flex items-center justify-between gap-2 border-b-3 border-foreground bg-card/95 px-3 py-2 backdrop-blur sm:px-4 sm:py-3">
       <div className="flex items-center gap-2"><span className={cn("size-5 border-2 border-foreground", colorClass[me.color])} /><span className="font-display text-[11px]">{me.name}</span></div>
-      <div className="flex items-center gap-3"><PixelButton size="sm" variant="ghost" onClick={goToNewGame}>New game</PixelButton><span className="font-display text-[10px] text-muted-foreground">ROOM {room.code}</span></div>
+      <div className="flex items-center gap-2 sm:gap-3"><span className="rounded border-2 border-foreground bg-primary px-2 py-1 font-display text-[9px] text-foreground">SYNC TEST v1 ✓</span><PixelButton size="sm" variant="ghost" onClick={goToNewGame}>New game</PixelButton><span className="font-display text-[10px] text-muted-foreground">ROOM {room.code}</span></div>
     </header>
 
     <main className="mx-auto grid max-w-5xl gap-4 px-3 py-4 sm:gap-5 sm:px-4 sm:py-6 lg:grid-cols-[1.25fr_.9fr]">
