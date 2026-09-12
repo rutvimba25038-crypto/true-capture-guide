@@ -49,6 +49,8 @@ export type CatanState = {
   robberDiscardedSeats: number[];
   robberPendingTile: number | null;
   robberTargetSeats: number[];
+  freeRoadsRemaining: number;
+  freeRoadSeat: number | null;
 };
 
 export type GeometryIntersection = { id: string; x: number; y: number; tiles: number[] };
@@ -93,7 +95,7 @@ export const createCatanState = (playerCount = 4): CatanState => {
     phase: "setup", setupOrder: [...order, ...[...order].reverse()], setupIndex: 0, setupStep: "settlement",
     structures: [], roads: [], robberTile: Math.max(0, robberTile), devDeck: createDevDeck(),
     playedDevThisTurn: false, longestRoadSeat: null, largestArmySeat: null, trade: null, winnerSeat: null,
-    robberDiscardedSeats: [], robberPendingTile: null, robberTargetSeats: [],
+    robberDiscardedSeats: [], robberPendingTile: null, robberTargetSeats: [], freeRoadsRemaining: 0, freeRoadSeat: null,
   };
 };
 
