@@ -115,20 +115,8 @@ function PlayScreen() {
     await supabase.from("players").update({ ready: !me.ready }).eq("id", me.id);
   };
 
-  const startNewGame = async () => {
-    if (!window.confirm("Start a new game? This will reset the board and everyone's resources.")) {
-      return;
-    }
-
-    const { error } = await supabase
-      .from("rooms")
-      .update({ status: "lobby" })
-      .eq("id", room.id);
-
-    if (error) {
-      console.error("Could not start a new game:", error);
-      setNote("Could not start a new game. Please try again.");
-    }
+  const goToNewGame = () => {
+    window.location.href = "/";
   };
 
   const doRoll = async () => {
@@ -205,7 +193,7 @@ function PlayScreen() {
           <span className="font-display text-[11px]">{me.name}</span>
         </div>
         <div className="flex items-center gap-3">
-          <PixelButton size="sm" variant="ghost" onClick={startNewGame}>
+          <PixelButton size="sm" variant="ghost" onClick={goToNewGame}>
             New game
           </PixelButton>
           <span className="font-display text-[10px] text-muted-foreground">
