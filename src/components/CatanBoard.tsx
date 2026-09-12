@@ -25,8 +25,8 @@ export function CatanBoard({ state, interactive = false, onIntersection, onEdge,
   }).join(" ");
 
   return (
-    <div className="overflow-auto border-4 border-foreground bg-catan-sea p-2 shadow-[8px_8px_0_0_var(--foreground)]">
-      <svg viewBox="0 0 1000 700" className="min-w-[680px] w-full" role="img" aria-label="Catan board">
+    <div className="w-full overflow-hidden border-4 border-foreground bg-catan-sea p-1 shadow-[5px_5px_0_0_var(--foreground)] sm:p-2 sm:shadow-[8px_8px_0_0_var(--foreground)]">
+      <svg viewBox="0 0 1000 700" className="block h-auto w-full touch-manipulation" role="img" aria-label="Catan board">
         <rect width="1000" height="700" fill="#7bb9d8" />
         {state.board.map((tile, index) => {
           const center = geometry.centers[index]!;
