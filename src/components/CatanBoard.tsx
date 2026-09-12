@@ -1,56 +1,63 @@
-import { TERRAIN, type CatanState } from "@/lib/catan";
-import { cn } from "@/lib/utils";
+import { getBoardGeometry, TERRAIN, type CatanState } from "@/lib/catan";
 
-/**
- * Shared-screen board. Classic CATAN styling: parchment sea, terrain hexes,
- * circular number tokens with red pips on 6 and 8.
- */
-export function CatanBoard({ state }: { state: CatanState }) {
-  const rows = state.rows ?? [3, 4, 5, 4, 3];
-  let index = 0;
-  const grouped = rows.map((count) => {
-    const slice = state.board.slice(index, index + count);
-    index += count;
-    return slice;
-  });
+type Props = {
+  state: CatanState;
+  interactive?: boolean;
+  onIntersection?: (id: string) => void;
+  onEdge?: (id: string) => void;
+  onTile?: (index: number) => void;
+  seatColors?: Record<number, string>;
+};
+
+const terrainFill: Record<string, string> = {
+  forest: "#4f7f42", hill: "#b65b3d", pasture: "#88b65c", field: "#e1b94b",
+  mountain: "#85878b", desert: "#d7a96b",
+};
+const playerFill = (seat: number, colors?: Record<number, string>) => colors?.[seat] ?? ["#e05252","#4d83d8","#e0b43e","#58a56a"][seat % 4]!;
+
+export function CatanBoard({ state, interactive = false, onIntersection, onEdge, onTile, seatColors }: Props) {
+  const geometry = getBoardGeometry(state.rows);
+  const pointsForTile = (index: number) => (geometry.tileVertices[index] ?? []).map((id) => {
+    const p = geometry.intersections.find((i) => i.id === id)!;
+    return `${p.x},${p.y}`;
+  }).join(" ");
 
   return (
-    <div className="border-4 border-foreground bg-catan-sea p-6 shadow-[8px_8px_0_0_var(--foreground)]">
-      <div className="flex flex-col items-center gap-1 rounded-none bg-catan-parchment/20 py-4">
-        {grouped.map((row, r) => (
-          <div key={r} className="-my-3 flex gap-1">
-            {row.map((tile, i) => {
-              const hot = tile.number === 6 || tile.number === 8;
-              return (
-                <div
-                  key={`${r}-${i}`}
-                  className={cn(
-                    "hex-tile grid h-24 w-22 place-items-center sm:h-28 sm:w-26 lg:h-32 lg:w-30",
-                    TERRAIN[tile.terrain].className,
-                  )}
-                >
-                  {tile.number ? (
-                    <div className="grid size-10 place-items-center rounded-full border-2 border-foreground bg-catan-parchment lg:size-12">
-                      <span
-                        className={cn(
-                          "font-display text-[11px] lg:text-sm",
-                          hot ? "text-pixel-red" : "text-foreground",
-                        )}
-                      >
-                        {tile.number}
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="font-display text-[9px] text-foreground/70">
-                      DESERT
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
+    <div className="overflow-auto border-4 border-foreground bg-catan-sea p-2 shadow-[8px_8px_0_0_var(--foreground)]">
+      <svg viewBox="0 0 1000 700" className="min-w-[680px] w-full" role="img" aria-label="Catan board">
+        <rect width="1000" height="700" fill="#7bb9d8" />
+        {state.board.map((tile, index) => {
+          const center = geometry.centers[index]!;
+          const hot = tile.number === 6 || tile.number === 8;
+          return (
+            <g key={index} onClick={() => interactive && onTile?.(index)} className={interactive && onTile ? "cursor-pointer" : ""}>
+              <polygon points={pointsForTile(index)} fill={terrainFill[tile.terrain]} stroke="#242424" strokeWidth="4" />
+              {tile.number ? <>
+                <circle cx={center.x} cy={center.y} r="24" fill="#f3e7c8" stroke="#242424" strokeWidth="3" />
+                <text x={center.x} y={center.y + 7} textAnchor="middle" fontSize="22" fontWeight="700" fill={hot ? "#d94a4a" : "#242424"}>{tile.number}</text>
+              </> : <text x={center.x} y={center.y + 5} textAnchor="middle" fontSize="14" fontWeight="700">DESERT</text>}
+              {state.robberTile === index && <text x={center.x} y={center.y - 34} textAnchor="middle" fontSize="28">🦹</text>}
+            </g>
+          );
+        })}
+        {geometry.edges.map((edge) => {
+          const a = geometry.intersections.find((i) => i.id === edge.a)!;
+          const b = geometry.intersections.find((i) => i.id === edge.b)!;
+          const road = state.roads.find((r) => r.edgeId === edge.id);
+          return <line key={edge.id} x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+            stroke={road ? playerFill(road.seat, seatColors) : "rgba(36,36,36,.16)"} strokeWidth={road ? 12 : 5}
+            strokeLinecap="round" onClick={() => interactive && onEdge?.(edge.id)} className={interactive && onEdge ? "cursor-pointer" : ""} />;
+        })}
+        {geometry.intersections.map((point) => {
+          const building = state.structures.find((s) => s.intersectionId === point.id);
+          return <g key={point.id} onClick={() => interactive && onIntersection?.(point.id)} className={interactive && onIntersection ? "cursor-pointer" : ""}>
+            {building ? building.type === "city"
+              ? <rect x={point.x - 13} y={point.y - 13} width="26" height="26" rx="3" fill={playerFill(building.seat, seatColors)} stroke="#242424" strokeWidth="4" />
+              : <circle cx={point.x} cy={point.y} r="11" fill={playerFill(building.seat, seatColors)} stroke="#242424" strokeWidth="4" />
+              : <circle cx={point.x} cy={point.y} r={interactive ? 7 : 4} fill="rgba(255,255,255,.45)" stroke="#242424" strokeWidth="2" />}
+          </g>;
+        })}
+      </svg>
     </div>
   );
 }
