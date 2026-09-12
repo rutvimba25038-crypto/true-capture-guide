@@ -3,7 +3,7 @@ import { useState } from "react";
 import { PixelButton, PixelPanel, PixelTag } from "@/components/pixel";
 import { SiteHeader } from "@/components/SiteHeader";
 import { GAMES } from "@/lib/games";
-import { createRoom, joinRoom } from "@/lib/room";
+import { createRoom } from "@/lib/room";
 
 export const Route = createFileRoute("/host")({
   head: () => ({
