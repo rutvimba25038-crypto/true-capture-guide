@@ -326,13 +326,13 @@ function PlayScreen() {
   const setupText = state.phase === "setup" ? `SET-UP: ${state.setupStep === "settlement" ? "place a settlement" : "place an adjacent road"}` : null;
   const points = publicVictoryPoints(state, me.seat) + devCards.filter((c) => c.card === "victoryPoint").length;
 
-  return <div className="min-h-screen pb-10">
-    <header className="flex items-center justify-between gap-3 border-b-3 border-foreground bg-card px-4 py-3">
+  return <div className="min-h-screen bg-background pb-24 sm:pb-10">
+    <header className="sticky top-0 z-40 flex items-center justify-between gap-2 border-b-3 border-foreground bg-card/95 px-3 py-2 backdrop-blur sm:px-4 sm:py-3">
       <div className="flex items-center gap-2"><span className={cn("size-5 border-2 border-foreground", colorClass[me.color])} /><span className="font-display text-[11px]">{me.name}</span></div>
       <div className="flex items-center gap-3"><PixelButton size="sm" variant="ghost" onClick={goToNewGame}>New game</PixelButton><span className="font-display text-[10px] text-muted-foreground">ROOM {room.code}</span></div>
     </header>
 
-    <main className="mx-auto grid max-w-5xl gap-5 px-4 py-6 lg:grid-cols-[1.25fr_.9fr]">
+    <main className="mx-auto grid max-w-5xl gap-4 px-3 py-4 sm:gap-5 sm:px-4 sm:py-6 lg:grid-cols-[1.25fr_.9fr]">
       {room.status === "lobby" ? <div className="lg:col-span-2 grid gap-5">
         <PixelPanel large className="grid gap-3 text-center">
           <div className="text-4xl">🏝️ 🎲 🏠</div>
@@ -347,19 +347,19 @@ function PlayScreen() {
           <div className="border-3 border-foreground bg-muted p-3 font-mono text-xs"><strong>⚠️ Roll a 7?</strong> Players with more than 7 cards discard half, then the active player moves the robber and may steal a card.</div>
         </PixelPanel>
         <PixelPanel large className="grid gap-4 text-center"><h1>Waiting room</h1><p className="font-mono text-sm text-muted-foreground">When you're ready, mark yourself ready. Start the game from the shared screen.</p><PixelButton onClick={toggleReady} variant={me.ready ? "ghost" : "primary"}>{me.ready ? "I'm not ready" : "I'm ready"}</PixelButton><ul className="grid gap-2 text-left">{players.map((p) => <li key={p.id} className="flex items-center gap-2 border-3 border-foreground px-3 py-2"><span className="flex-1 font-mono">{p.name}</span><PixelTag tone={p.ready ? "live" : "muted"}>{p.ready ? "Ready" : "…"}</PixelTag></li>)}</ul></PixelPanel></div> : <>
-        <div className="grid gap-4">
+        <div className="grid gap-3 sm:gap-4">
           {(highlightSettlements.length > 0 || highlightRoads.length > 0 || state.phase === "robber-move") && (
             <PixelPanel large className="grid gap-3 bg-primary/15 text-center">
               <div className="font-display text-[10px] text-muted-foreground">GUIDED ACTION</div>
               <div className="text-3xl">{highlightSettlements.length ? "🏠" : highlightRoads.length ? "🛣️" : "🦹"}</div>
-              <div className="font-display text-lg">{highlightSettlements.length ? "STEP 1: CHOOSE A SETTLEMENT SPOT" : highlightRoads.length ? "STEP 2: CHOOSE A ROAD LOCATION" : "CHOOSE WHERE TO MOVE THE ROBBER"}</div>
+              <div className="font-display text-sm sm:text-lg">{highlightSettlements.length ? "STEP 1: CHOOSE A SETTLEMENT SPOT" : highlightRoads.length ? "STEP 2: CHOOSE A ROAD LOCATION" : "CHOOSE WHERE TO MOVE THE ROBBER"}</div>
               <p className="font-mono text-xs text-muted-foreground">{highlightSettlements.length ? "Tap any glowing circle below. Only legal locations are highlighted." : highlightRoads.length ? "Tap any bright highlighted road line below. Choose the location you want." : "Tap any valid tile below to choose the robber's new location."}</p>
               <div className="flex flex-wrap justify-center gap-2">
                 <PixelButton size="sm" variant="primary" onClick={() => document.getElementById("catan-action-map")?.scrollIntoView({ behavior: "smooth", block: "center" })}>VIEW MAP & CHOOSE ↓</PixelButton>
               </div>
             </PixelPanel>
           )}
-          <div id="catan-action-map" className={cn((highlightSettlements.length || highlightRoads.length || state.phase === "robber-move") ? "ring-4 ring-primary/40" : "")}>
+          <div id="catan-action-map" className={cn("scroll-mt-20 rounded-sm", (highlightSettlements.length || highlightRoads.length || state.phase === "robber-move") ? "ring-4 ring-primary/40" : "")}>
             <CatanBoard state={state} interactive={myTurn && (state.phase === "setup" || mode != null || state.phase === "robber-move")} onIntersection={placeIntersection} onEdge={placeEdge} onTile={moveRobber} seatColors={seatColors} highlightedIntersections={highlightSettlements} highlightedEdges={highlightRoads} />
           </div>
           <p className="border-2 border-foreground bg-primary/10 p-2 text-center font-mono text-xs text-muted-foreground">{highlightSettlements.length ? "🏠 Choose a glowing settlement spot above or tap one directly on the board." : highlightRoads.length ? "🛣️ Choose a highlighted road option above or tap a bright road line directly on the board." : state.phase === "robber-move" ? "🦹 Choose a tile on the board to move the robber." : "Choose an action, then select a highlighted location."}</p>
