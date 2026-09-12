@@ -141,11 +141,11 @@ function RoomScreen() {
             </ul>
             <PixelButton
               size="lg"
-              disabled={players.length < 2}
+              disabled={players.length < 3}
               onClick={startGame}
               className="mt-auto"
             >
-              {players.length < 2 ? "Need 2+ players" : "Start game"}
+              {players.length < 3 ? "Need 3+ players" : "Start game"}
             </PixelButton>
           </PixelPanel>
         </main>
