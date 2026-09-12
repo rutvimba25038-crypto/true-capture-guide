@@ -6,7 +6,7 @@ import { useRoom } from "@/hooks/useRoom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   BUILD_COSTS, canAfford, canPlaceRoad, canPlaceSettlement, emptyHand, emptyOffer,
-  halfDiscardCount, longestRoadLength, pay, productionForRoll, publicVictoryPoints,
+  getBoardGeometry, halfDiscardCount, longestRoadLength, pay, productionForRoll, publicVictoryPoints,
   RESOURCES, resourceCount, robberTargets, rollDice, setupResourcesForIntersection,
   TERRAIN, type CatanState, type DevCard, type PlayerHand,
 } from "@/lib/catan";
@@ -183,7 +183,7 @@ function PlayScreen() {
     if (!setup && state.roads.filter((r) => r.seat === me.seat).length >= 15) return setNote("You have no road pieces left.");
     if (setup) {
       const latest = [...state.structures].reverse().find((s) => s.seat === me.seat);
-      const geometry = (await import("@/lib/catan")).getBoardGeometry(state.rows);
+      const geometry = getBoardGeometry(state.rows);
       const edge = geometry.edges.find((e) => e.id === id);
       if (!latest || !edge || (edge.a !== latest.intersectionId && edge.b !== latest.intersectionId)) return setNote("Your setup road must touch the settlement you just placed.");
     }
