@@ -183,65 +183,34 @@ function RoomScreen() {
           </div>
         </main>
       ) : (
-        <main className="mx-auto grid max-w-7xl gap-8 px-5 py-8 lg:grid-cols-[1.4fr_1fr]">
-          <div className="grid gap-5">
-            <CatanBoard state={state} />
+        <main className="mx-auto max-w-[1500px] px-4 py-5">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-3 border-foreground bg-card px-4 py-3">
+            <div><p className="font-display text-[10px] text-muted-foreground">CURRENT TURN</p><p className="font-display text-lg">{current?.name ?? "—"}</p></div>
+            <div className="flex items-center gap-3"><Die value={state.dice?.[0] ?? null} /><Die value={state.dice?.[1] ?? null} /><div><p className="font-display text-[10px] text-muted-foreground">TOTAL</p><p className="font-display text-xl">{state.dice ? state.dice[0] + state.dice[1] : "--"}</p></div></div>
+            <div className="text-right font-mono text-xs text-muted-foreground">ROOM {room.code}<br/>FIRST TO 10 VP WINS</div>
           </div>
-          <div className="grid content-start gap-5">
-            <PixelPanel large>
-              <h2 className="text-sm">Turn</h2>
-              <p className="mt-3 font-display text-2xl text-pixel-red">
-                {current?.name ?? "—"}
-              </p>
-              <div className="mt-5 flex items-center gap-3">
-                <Die value={state.dice?.[0] ?? null} />
-                <Die value={state.dice?.[1] ?? null} />
-                <span className="font-display text-sm">
-                  {state.dice ? state.dice[0] + state.dice[1] : "--"}
-                </span>
-              </div>
-            </PixelPanel>
-
-            <PixelPanel large>
-              <h2 className="text-sm">Settlers</h2>
-              <ul className="mt-4 grid gap-3">
-                {players.map((p) => {
-                  const hand =
-                    ((p.private_state as { hand?: PlayerHand })?.hand ?? emptyHand());
-                  const cards = Object.values(hand).reduce((a, b) => a + b, 0);
-                  return (
-                    <li
-                      key={p.id}
-                      className={cn(
-                        "flex items-center gap-3 border-3 border-foreground px-3 py-2",
-                        p.seat === state.turnSeat ? "bg-primary/30" : "bg-background",
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "size-5 border-2 border-foreground",
-                          colorClass[p.color],
-                        )}
-                      />
-                      <span className="flex-1 font-mono">{p.name}</span>
-                      <span className="font-display text-[10px]">{cards} cards · {publicVictoryPoints(state, p.seat)} VP</span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </PixelPanel>
-
-            <PixelPanel large>
-              <h2 className="text-sm">Log</h2>
-              <ul className="mt-3 grid gap-2 font-mono text-sm text-muted-foreground">
-                {[...(state.log ?? [])].slice(-6).reverse().map((line, i) => (
-                  <li key={i}>› {line}</li>
-                ))}
-              </ul>
-            </PixelPanel>
+          <div className="grid gap-4 xl:grid-cols-[250px_minmax(0,1fr)_280px]">
+            <aside className="grid content-start gap-3">
+              <p className="px-1 font-display text-[10px] text-muted-foreground">PLAYERS</p>
+              {players.map((p) => {
+                const hand = ((p.private_state as { hand?: PlayerHand })?.hand ?? emptyHand());
+                const cards = Object.values(hand).reduce((a, b) => a + b, 0);
+                const vp = publicVictoryPoints(state, p.seat);
+                return <div key={p.id} className={cn("border-3 border-foreground bg-card p-3", p.seat === state.turnSeat ? "ring-4 ring-primary/40" : "")}>
+                  <div className="flex items-center gap-2"><span className={cn("size-5 border-2 border-foreground", colorClass[p.color])} /><span className="flex-1 truncate font-display text-[11px]">{p.name}</span><strong className="font-display text-sm">{vp} VP</strong></div>
+                  <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground"><span>🃏 {cards} cards</span><span>{p.seat === state.longestRoadSeat ? "🛣️" : ""} {p.seat === state.largestArmySeat ? "⚔️" : ""}</span></div>
+                </div>;
+              })}
+              <PixelPanel className="mt-2"><p className="font-display text-[10px]">GAME STATUS</p><p className="mt-2 font-mono text-xs text-muted-foreground">{state.phase === "setup" ? "Players are placing their starting pieces." : "Watch the board for the current player's move."}</p></PixelPanel>
+            </aside>
+            <section className="min-w-0"><div className="relative min-h-[620px] overflow-hidden border-4 border-foreground bg-catan-sea p-2 shadow-[8px_8px_0_0_var(--foreground)]"><div className="pointer-events-none absolute left-4 top-4 z-10 border-2 border-foreground bg-card/90 px-3 py-2 font-display text-[10px]">CATAN · SHARED BOARD</div><CatanBoard state={state} /></div></section>
+            <aside className="grid content-start gap-4">
+              <PixelPanel large><div className="flex items-center justify-between"><h2 className="text-sm">Turn</h2><PixelTag tone="live">{state.phase}</PixelTag></div><p className="mt-3 font-display text-2xl text-pixel-red">{current?.name ?? "—"}</p><p className="mt-2 font-mono text-xs text-muted-foreground">{state.dice ? "Dice rolled — follow the action on player screens." : "Waiting for the player to roll."}</p></PixelPanel>
+              <PixelPanel large><h2 className="text-sm">Game log</h2><ul className="mt-3 grid max-h-[300px] gap-2 overflow-auto font-mono text-xs text-muted-foreground">{[...(state.log ?? [])].slice(-12).reverse().map((line, i) => <li key={i} className="border-b border-foreground/15 pb-2">› {line}</li>)}</ul></PixelPanel>
+              <PixelPanel large><h2 className="text-sm">Awards</h2><div className="mt-3 grid gap-2 font-mono text-xs"><div className="flex justify-between"><span>🛣️ Longest Road</span><strong>{players.find((p) => p.seat === state.longestRoadSeat)?.name ?? "—"}</strong></div><div className="flex justify-between"><span>⚔️ Largest Army</span><strong>{players.find((p) => p.seat === state.largestArmySeat)?.name ?? "—"}</strong></div></div></PixelPanel>
+            </aside>
           </div>
-        </main>
-      )}
+        </main>      )}
     </div>
   );
 }
