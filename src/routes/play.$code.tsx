@@ -323,7 +323,20 @@ function PlayScreen() {
     </header>
 
     <main className="mx-auto grid max-w-5xl gap-5 px-4 py-6 lg:grid-cols-[1.25fr_.9fr]">
-      {room.status === "lobby" ? <div className="lg:col-span-2"><PixelPanel large className="grid gap-4 text-center"><h1>Waiting room</h1><p className="font-mono text-sm text-muted-foreground">Ready up, then start from the shared screen.</p><PixelButton onClick={toggleReady} variant={me.ready ? "ghost" : "primary"}>{me.ready ? "I'm not ready" : "I'm ready"}</PixelButton><ul className="grid gap-2 text-left">{players.map((p) => <li key={p.id} className="flex items-center gap-2 border-3 border-foreground px-3 py-2"><span className="flex-1 font-mono">{p.name}</span><PixelTag tone={p.ready ? "live" : "muted"}>{p.ready ? "Ready" : "…"}</PixelTag></li>)}</ul></PixelPanel></div> : <>
+      {room.status === "lobby" ? <div className="lg:col-span-2 grid gap-5">
+        <PixelPanel large className="grid gap-3 text-center">
+          <div className="text-4xl">🏝️ 🎲 🏠</div>
+          <h1>How to play</h1>
+          <p className="font-mono text-sm text-muted-foreground">A quick visual guide before the game begins.</p>
+          <div className="grid gap-3 text-left md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-2 border-3 border-foreground bg-primary/10 p-4"><div className="text-3xl">🏠 → 🛣️</div><strong className="font-display text-[11px]">1. SET UP</strong><p className="font-mono text-xs">Place a settlement, then a road touching it. You do this twice.</p></div>
+            <div className="grid gap-2 border-3 border-foreground bg-card p-4"><div className="text-3xl">🎲 → 🌲🧱🐑🌾⛰️</div><strong className="font-display text-[11px]">2. ROLL & COLLECT</strong><p className="font-mono text-xs">Roll the dice. Matching tiles next to your buildings produce resources.</p></div>
+            <div className="grid gap-2 border-3 border-foreground bg-card p-4"><div className="text-3xl">🛣️ 🏠 🏙️ 🤝</div><strong className="font-display text-[11px]">3. BUILD & TRADE</strong><p className="font-mono text-xs">Use resources to build roads, settlements and cities, or trade for what you need.</p></div>
+            <div className="grid gap-2 border-3 border-foreground bg-primary/10 p-4"><div className="text-3xl">🏆 10 VP</div><strong className="font-display text-[11px]">4. WIN</strong><p className="font-mono text-xs">Earn victory points. First player to reach 10 points wins the game.</p></div>
+          </div>
+          <div className="border-3 border-foreground bg-muted p-3 font-mono text-xs"><strong>⚠️ Roll a 7?</strong> Players with more than 7 cards discard half, then the active player moves the robber and may steal a card.</div>
+        </PixelPanel>
+        <PixelPanel large className="grid gap-4 text-center"><h1>Waiting room</h1><p className="font-mono text-sm text-muted-foreground">When you're ready, mark yourself ready. Start the game from the shared screen.</p><PixelButton onClick={toggleReady} variant={me.ready ? "ghost" : "primary"}>{me.ready ? "I'm not ready" : "I'm ready"}</PixelButton><ul className="grid gap-2 text-left">{players.map((p) => <li key={p.id} className="flex items-center gap-2 border-3 border-foreground px-3 py-2"><span className="flex-1 font-mono">{p.name}</span><PixelTag tone={p.ready ? "live" : "muted"}>{p.ready ? "Ready" : "…"}</PixelTag></li>)}</ul></PixelPanel></div> : <>
         <div className="grid gap-4">
           <CatanBoard state={state} interactive={myTurn && (state.phase === "setup" || mode != null || state.phase === "robber-move")} onIntersection={placeIntersection} onEdge={placeEdge} onTile={moveRobber} seatColors={seatColors} />
           <p className="font-mono text-xs text-muted-foreground">Tap intersections to place settlements/cities, road lines to build roads, and tiles to move the robber.</p>
