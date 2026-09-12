@@ -93,47 +93,68 @@ function PlayScreen() {
     emptyHand()) as PlayerHand;
   const myTurn = room.status === "playing" && state.turnSeat === me.seat;
 
-  const saveHand = async (player: Player, next: PlayerHand) =>
-    supabase
+  const saveHand = async (player: Player, next: PlayerHand) => {
+    const { error } = await supabase
       .from("players")
       .update({ private_state: { ...player.private_state, hand: next } })
       .eq("id", player.id);
+    if (error) throw error;
+  };
 
-  const pushLog = async (line: string, patch: Partial<CatanState> = {}) =>
-    supabase
+  const pushLog = async (line: string, patch: Partial<CatanState> = {}) => {
+    const { error } = await supabase
       .from("rooms")
       .update({
         state: { ...state, ...patch, log: [...(state.log ?? []), line].slice(-40) },
       })
       .eq("id", room.id);
+    if (error) throw error;
+  };
 
   const toggleReady = async () => {
     await supabase.from("players").update({ ready: !me.ready }).eq("id", me.id);
   };
 
   const doRoll = async () => {
+    // Guard the action here too; the button state alone is not enough.
+    if (!myTurn || busy || state.dice != null) return;
+
     setBusy(true);
-    const dice = rollDice();
-    const total = dice[0] + dice[1];
-    const gained = production(state.board, total);
-    await Promise.all(
-      players.map((p) => {
-        const h = ((p.private_state as { hand?: PlayerHand })?.hand ??
-          emptyHand()) as PlayerHand;
-        const next = { ...h };
-        gained.forEach((r) => {
-          next[r] += 1;
-        });
-        return saveHand(p, next);
-      }),
-    );
-    await pushLog(
-      total === 7
-        ? `${me.name} rolled 7 — the robber stirs.`
-        : `${me.name} rolled ${total}. ${gained.length} tile(s) produced.`,
-      { dice },
-    );
-    setBusy(false);
+    setNote(null);
+
+    try {
+      const dice = rollDice();
+      const total = dice[0] + dice[1];
+      const gained = production(state.board, total);
+
+      await Promise.all(
+        players.map((p) => {
+          const h = ((p.private_state as { hand?: PlayerHand })?.hand ??
+            emptyHand()) as PlayerHand;
+          const next = { ...h };
+          gained.forEach((r) => {
+            next[r] += 1;
+          });
+          return saveHand(p, next);
+        }),
+      );
+
+      await pushLog(
+        total === 7
+          ? `${me.name} rolled 7 — the robber stirs.`
+          : `${me.name} rolled ${total}. ${gained.length} tile(s) produced.`,
+        { dice },
+      );
+    } catch (err) {
+      console.error("Could not roll dice:", err);
+      setNote(
+        err instanceof Error
+          ? `Could not roll dice: ${err.message}`
+          : "Could not roll dice. Please try again.",
+      );
+    } finally {
+      setBusy(false);
+    }
   };
 
   const build = async (what: string) => {
@@ -243,7 +264,7 @@ function PlayScreen() {
               <h2 className="text-sm">Actions</h2>
               <PixelButton
                 size="lg"
-                disabled={!myTurn || busy || state.dice !== null}
+                disabled={!myTurn || busy || state.dice != null}
                 onClick={doRoll}
               >
                 Roll dice
