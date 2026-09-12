@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PixelButton, PixelPanel } from "@/components/pixel";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getRoomByCode, joinRoom } from "@/lib/room";
@@ -35,6 +35,11 @@ function JoinPage() {
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Prefill from a scanned QR link (/join?code=4827).
+  useEffect(() => {
+    if (search.code) setCode(search.code);
+  }, [search.code]);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
