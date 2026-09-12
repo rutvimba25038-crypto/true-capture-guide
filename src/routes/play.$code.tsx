@@ -39,6 +39,7 @@ function PlayScreen() {
   const [tradeWantQty, setTradeWantQty] = useState(1);
   const [devResource, setDevResource] = useState<keyof PlayerHand>("lumber");
   const [devResource2, setDevResource2] = useState<keyof PlayerHand>("brick");
+  const [mapChooserOpen, setMapChooserOpen] = useState(false);
 
   const myId = getLocalPlayerId(code);
   const me = players.find((p) => p.id === myId) ?? null;
@@ -347,6 +348,24 @@ function PlayScreen() {
           <div className="border-3 border-foreground bg-muted p-3 font-mono text-xs"><strong>⚠️ Roll a 7?</strong> Players with more than 7 cards discard half, then the active player moves the robber and may steal a card.</div>
         </PixelPanel>
         <PixelPanel large className="grid gap-4 text-center"><h1>Waiting room</h1><p className="font-mono text-sm text-muted-foreground">When you're ready, mark yourself ready. Start the game from the shared screen.</p><PixelButton onClick={toggleReady} variant={me.ready ? "ghost" : "primary"}>{me.ready ? "I'm not ready" : "I'm ready"}</PixelButton><ul className="grid gap-2 text-left">{players.map((p) => <li key={p.id} className="flex items-center gap-2 border-3 border-foreground px-3 py-2"><span className="flex-1 font-mono">{p.name}</span><PixelTag tone={p.ready ? "live" : "muted"}>{p.ready ? "Ready" : "…"}</PixelTag></li>)}</ul></PixelPanel></div> : <>
+        {(highlightSettlements.length > 0 || highlightRoads.length > 0 || state.phase === "robber-move" || mapChooserOpen) && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-2 sm:p-6">
+            <div className="flex max-h-[96vh] w-full max-w-3xl flex-col gap-3 overflow-auto border-4 border-foreground bg-background p-3 shadow-[8px_8px_0_0_var(--foreground)] sm:p-5">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-display text-[10px] text-muted-foreground">CHOOSE ON THE MAP</p>
+                  <h2 className="font-display text-base sm:text-xl">{highlightSettlements.length ? "🏠 TAP A GLOWING SETTLEMENT SPOT" : highlightRoads.length ? "🛣️ TAP A GLOWING ROAD LOCATION" : "🦹 TAP A TILE"}</h2>
+                </div>
+                <PixelButton size="sm" variant="ghost" onClick={() => setMapChooserOpen(false)}>CLOSE</PixelButton>
+              </div>
+              <p className="font-mono text-xs text-muted-foreground">Pinch or zoom your phone if needed. Tap the highlighted location you want — your choice is built immediately.</p>
+              <div className="rounded-sm ring-4 ring-primary/40">
+                <CatanBoard state={state} interactive={myTurn} onIntersection={(id) => { placeIntersection(id); setMapChooserOpen(false); }} onEdge={(id) => { placeEdge(id); setMapChooserOpen(false); }} onTile={(id) => { moveRobber(id); setMapChooserOpen(false); }} seatColors={seatColors} highlightedIntersections={highlightSettlements} highlightedEdges={highlightRoads} />
+              </div>
+              <PixelButton variant="ghost" onClick={() => setMapChooserOpen(false)}>BACK TO CONTROLS</PixelButton>
+            </div>
+          </div>
+        )}
         <div className="grid gap-3 sm:gap-4">
           {(highlightSettlements.length > 0 || highlightRoads.length > 0 || state.phase === "robber-move") && (
             <PixelPanel large className="grid gap-3 bg-primary/15 text-center">
@@ -355,7 +374,7 @@ function PlayScreen() {
               <div className="font-display text-sm sm:text-lg">{highlightSettlements.length ? "STEP 1: CHOOSE A SETTLEMENT SPOT" : highlightRoads.length ? "STEP 2: CHOOSE A ROAD LOCATION" : "CHOOSE WHERE TO MOVE THE ROBBER"}</div>
               <p className="font-mono text-xs text-muted-foreground">{highlightSettlements.length ? "Tap any glowing circle below. Only legal locations are highlighted." : highlightRoads.length ? "Tap any bright highlighted road line below. Choose the location you want." : "Tap any valid tile below to choose the robber's new location."}</p>
               <div className="flex flex-wrap justify-center gap-2">
-                <PixelButton size="sm" variant="primary" onClick={() => document.getElementById("catan-action-map")?.scrollIntoView({ behavior: "smooth", block: "center" })}>VIEW MAP & CHOOSE ↓</PixelButton>
+                <PixelButton size="sm" variant="primary" onClick={() => setMapChooserOpen(true)}>OPEN MAP & CHOOSE</PixelButton>
               </div>
             </PixelPanel>
           )}
