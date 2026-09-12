@@ -106,7 +106,8 @@ function PlayScreen() {
     try {
       const dice = rollDice(); const total = dice[0] + dice[1];
       if (total === 7) {
-        const next = logState({ dice, phase: "robber-discard", robberDiscardedSeats: [], robberPendingTile: null, robberTargetSeats: [] }, `${me.name} rolled 7. Players with more than 7 cards must discard half.`);
+        const needsDiscard = players.some((p) => halfDiscardCount((privateState(p).hand ?? emptyHand()) as PlayerHand) > 0);
+        const next = logState({ dice, phase: needsDiscard ? "robber-discard" : "robber-move", robberDiscardedSeats: [], robberPendingTile: null, robberTargetSeats: [] }, needsDiscard ? `${me.name} rolled 7. Players with more than 7 cards must discard half.` : `${me.name} rolled 7. Move the robber.`);
         await updateRoom(next);
       } else {
         const gains = productionForRoll(state, total);
@@ -144,6 +145,7 @@ function PlayScreen() {
     const wantsSettlement = (setup && state.setupStep === "settlement") || (!setup && mode === "settlement");
     if (wantsSettlement) {
       if (!canPlaceSettlement(state, me.seat, id, setup)) return setNote("You cannot build a settlement there.");
+      if (state.structures.filter((s) => s.seat === me.seat && s.type === "settlement").length >= 5 && !setup) return setNote("You have no settlement pieces left.");
       const secondSetup = setup && state.setupIndex >= players.length;
       const nextStructures = [...state.structures, { intersectionId: id, seat: me.seat, type: "settlement" as const }];
       if (!setup && !canAfford(hand, BUILD_COSTS.Settlement)) return setNote("Not enough resources.");
@@ -163,6 +165,7 @@ function PlayScreen() {
     if (!setup && mode === "city") {
       const own = state.structures.find((s) => s.intersectionId === id && s.seat === me.seat && s.type === "settlement");
       if (!own) return setNote("A city must upgrade one of your settlements.");
+      if (state.structures.filter((s) => s.seat === me.seat && s.type === "city").length >= 4) return setNote("You have no city pieces left.");
       if (!canAfford(hand, BUILD_COSTS.City)) return setNote("Not enough resources.");
       const structures = state.structures.map((s) => s.intersectionId === id ? { ...s, type: "city" as const } : s);
       await savePlayer(me, { hand: pay(hand, BUILD_COSTS.City) });
@@ -177,6 +180,13 @@ function PlayScreen() {
     const free = state.freeRoadSeat === me.seat && state.freeRoadsRemaining > 0;
     const wantsRoad = (setup && state.setupStep === "road") || mode === "road" || free;
     if (!wantsRoad || !canPlaceRoad(state, me.seat, id, free)) return setNote("You cannot build a road there.");
+    if (!setup && state.roads.filter((r) => r.seat === me.seat).length >= 15) return setNote("You have no road pieces left.");
+    if (setup) {
+      const latest = [...state.structures].reverse().find((s) => s.seat === me.seat);
+      const geometry = (await import("@/lib/catan")).getBoardGeometry(state.rows);
+      const edge = geometry.edges.find((e) => e.id === id);
+      if (!latest || !edge || (edge.a !== latest.intersectionId && edge.b !== latest.intersectionId)) return setNote("Your setup road must touch the settlement you just placed.");
+    }
     if (!setup && !free && !canAfford(hand, BUILD_COSTS.Road)) return setNote("Not enough resources.");
     if (!setup && !free) await savePlayer(me, { hand: pay(hand, BUILD_COSTS.Road) });
     const roads = [...state.roads, { edgeId: id, seat: me.seat }];
