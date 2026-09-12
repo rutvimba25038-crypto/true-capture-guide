@@ -1,4 +1,4 @@
-import { getBoardGeometry, TERRAIN, type CatanState } from "@/lib/catan";
+import { getBoardGeometry, type CatanState } from "@/lib/catan";
 
 type Props = {
   state: CatanState;
